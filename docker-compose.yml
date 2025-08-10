@@ -7,4 +7,5 @@ services:
     volumes:
       - .:/app
     stdin_open: true
+    container_name: pubquizzr
     tty: true
