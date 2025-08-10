@@ -30,11 +30,6 @@ socket.on("playerList", (players) => {
   });
 });
 
-document.getElementById('beginGameBtn').addEventListener('click', () => {
-  socket.emit('startGame', { pin: currentPin });
-});
-
-
 socket.on("gameProgress", ({ round, question, pin }) => {
   if (pin) pinDisplay.textContent = `Game PIN: ${pin}`;
   roundDisplay.textContent = `Round: ${round}`;
