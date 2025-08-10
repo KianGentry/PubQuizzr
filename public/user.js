@@ -63,7 +63,7 @@ socket.on('joined', (data) => {
       document.getElementById('pin').value = '';
       document.getElementById('username').value = '';
     }
-    alert(data.message);
+    alert(data.message || "Failed to join game.");
   }
 });
 

@@ -37,6 +37,14 @@ io.on("connection", (socket) => {
 
   // Player joins
   socket.on("joinGame", ({ pin, username, userId }) => {
+    // Check if username is already taken by a different userId
+    const usernameTaken = Object.entries(userIdToUsername).some(
+      ([uid, uname]) => uname === username && uid !== userId
+    );
+    if (usernameTaken) {
+      socket.emit("joined", { success: false, message: "Username already taken." });
+      return;
+    }
     // Only allow join if userId is present and matches username (or is new)
     if (
       pin === game.pin &&
@@ -56,7 +64,7 @@ io.on("connection", (socket) => {
       // Send player list as usernames
       io.emit("playerList", Object.values(userIdToUsername));
     } else {
-      socket.emit("joined", { success: false });
+      socket.emit("joined", { success: false, message: "Invalid join attempt." });
     }
   });
 
