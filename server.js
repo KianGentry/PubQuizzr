@@ -77,6 +77,11 @@ io.on("connection", (socket) => {
       question: game.currentQuestion
     });
     io.emit("answersUpdated", game.answers);
+    // Emit newQuestion event to users
+    io.emit("newQuestion", {
+      round: game.currentRound,
+      question: game.currentQuestion
+    });
   });
 
   // Admin moves to next round
@@ -99,6 +104,11 @@ io.on("connection", (socket) => {
       question: game.currentQuestion
     });
     io.emit("answersUpdated", game.answers);
+    // Emit newQuestion event to users
+    io.emit("newQuestion", {
+      round: game.currentRound,
+      question: game.currentQuestion
+    });
   });
 
   socket.on("getGameState", () => {

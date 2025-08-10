@@ -4,6 +4,8 @@ const joinForm = document.getElementById('joinForm');
 const gameArea = document.getElementById('gameArea');
 const questionTitle = document.getElementById('questionTitle');
 const answerForm = document.getElementById('answerForm');
+const answerInput = document.getElementById('answer');
+const answerButton = answerForm.querySelector('button');
 
 let currentPin = '';
 let username = '';
@@ -34,8 +36,22 @@ socket.on('joinedGame', (data) => {
 
 answerForm.addEventListener('submit', (e) => {
   e.preventDefault();
-  const answer = document.getElementById('answer').value.trim();
+  const answer = answerInput.value.trim();
   if (!answer) return;
   socket.emit('submitAnswer', { pin: currentPin, username, answer });
-  document.getElementById('answer').value = '';
+  answerInput.value = '';
+  // Disable input and button after submitting
+  answerInput.disabled = true;
+  answerButton.disabled = true;
 });
+
+// Listen for new question event to re-enable answer input/button
+socket.on('newQuestion', (data) => {
+  // Update question title with round and question number
+  questionTitle.textContent = `Round ${data.round} - Question ${data.question}`;
+  answerInput.disabled = false;
+  answerButton.disabled = false;
+  answerInput.value = '';
+});
+
+// ...existing code...
