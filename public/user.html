@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Quiz Player</title>
+</head>
+<body>
+  <h1>Join Quiz</h1>
+  
+  <div id="joinSection">
+    <label>PIN: <input id="pin" type="text" /></label>
+    <label>Username: <input id="username" type="text" /></label>
+    <button id="joinGame">Join</button>
+  </div>
+
+  <div id="quizSection" style="display:none;">
+    <h2 id="questionHeader">Waiting for question...</h2>
+    <input id="answerInput" type="text" placeholder="Your answer" />
+    <button id="submitAnswer">Submit Answer</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="user.js"></script>
+</body>
+</html>
