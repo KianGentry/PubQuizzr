@@ -43,16 +43,16 @@ document.getElementById('username').value = username;
 // If both PIN and username exist, auto-join the game
 if (currentPin && username) {
   socket.emit('joinGame', { pin: currentPin, username, userId });
-  joinForm.style.display = 'none';  
-  gameArea.style.display = 'block';
+  // Do NOT show game area yet; wait for server confirmation
 }
 
 // Listen for join result and handle invalid userId
 socket.on('joined', (data) => {
   if (data.success) {
+    joinForm.style.display = 'none';
+    gameArea.style.display = 'block';
     // ...existing code...
   } else {
-    // If join failed, revert UI and show error
     gameArea.style.display = 'none';
     joinForm.style.display = 'block';
     // If we tried to auto-join and failed, clear cookies (invalid userId)
@@ -65,6 +65,20 @@ socket.on('joined', (data) => {
     }
     alert(data.message);
   }
+});
+
+joinForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  currentPin = document.getElementById('pin').value.trim();
+  username = document.getElementById('username').value.trim();
+  if (!currentPin || !username) return;
+
+  setCookie('pin', currentPin);
+  setCookie('username', username);
+
+  socket.emit('joinGame', { pin: currentPin, username, userId });
+
+  // Do NOT show game area yet; wait for server confirmation
 });
 
 answerForm.addEventListener('submit', (e) => {
@@ -122,9 +136,6 @@ socket.on('answersUpdated', (answers) => {
 });
 
 // On auto-join, also request latest state to sync UI
-if (currentPin && username) {
-  socket.emit('getGameState');
-}
 if (currentPin && username) {
   socket.emit('getGameState');
 }
