@@ -15,13 +15,19 @@ joinForm.addEventListener('submit', (e) => {
   if (!currentPin || !username) return;
 
   socket.emit('joinGame', { pin: currentPin, username });
+
+  // Immediately show game area and hide join form
+  joinForm.style.display = 'none';
+  gameArea.style.display = 'block';
 });
 
 socket.on('joinedGame', (data) => {
   if (data.success) {
-    joinForm.style.display = 'none';
-    gameArea.style.display = 'block';
+    // ...existing code...
   } else {
+    // If join failed, revert UI and show error
+    gameArea.style.display = 'none';
+    joinForm.style.display = 'block';
     alert(data.message);
   }
 });
