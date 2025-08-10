@@ -1,25 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Quiz Admin</title>
+  <meta charset="UTF-8">
+  <title>Pub Quiz Admin</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h2 { margin-top: 0; }
+    button { margin: 5px; padding: 8px 12px; font-size: 16px; }
+    .round-block { border: 1px solid #ccc; margin: 10px 0; padding: 10px; }
+    .question-block { margin-left: 20px; padding: 5px; }
+    .question-block ul { margin: 5px 0 10px 20px; }
+    .question-block li { list-style-type: none; }
+  </style>
 </head>
 <body>
-  <h1>Pub Quiz Admin</h1>
-  
-  <div>
-    <label>Game PIN: <input id="gamePin" type="text" readonly /></label>
-    <button id="createGame">Create Game</button>
-  </div>
+  <h2>Admin Control Panel</h2>
 
-  <h2>Controls</h2>
-  <button id="nextQuestion">Next Question</button>
+  <p id="pin">Game PIN: Not started</p>
+  <p id="round">Round: -</p>
+  <p id="question">Question: -</p>
+
+  <button id="createGame">Create Game</button>
   <button id="nextRound">Next Round</button>
+  <button id="nextQuestion">Next Question</button>
 
-  <h2>Answers</h2>
+  <h3>Players</h3>
+  <ul id="players"></ul>
+
+  <h3>Answers</h3>
   <div id="answers"></div>
 
-  <script src="/socket.io/socket.io.js"></script>
   <script src="admin.js"></script>
 </body>
 </html>
