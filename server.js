@@ -1,103 +1,116 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
-const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static("public"));
 
-let game = null; // Single game object
+let game = {
+  pin: null,
+  players: [],
+  answers: {}, // { roundNum: { questionNum: { username: answer } } }
+  currentRound: 1,
+  currentQuestion: 1
+};
 
-// Create a new game
-app.post("/create-game", (req, res) => {
-  if (game) {
-    return res.json(game); // Game already exists
-  }
-  const pin = Math.floor(1000 + Math.random() * 9000).toString();
-  game = {
-    pin,
-    round: 1,
-    question: 1,
-    answers: {} // { 'round1-question1': [ { username, answer } ] }
-  };
-  res.json(game);
-});
-
-// Get current game state
-app.get("/game-state", (req, res) => {
-  if (!game) return res.status(404).json({ error: "No game active" });
-  res.json(game);
-});
-
-// Join game (user)
-app.post("/join-game", (req, res) => {
-  const { pin, username } = req.body;
-  if (!game || game.pin !== pin) {
-    return res.status(404).json({ error: "Game not found" });
-  }
-  res.json({ success: true });
-});
-
-// WebSocket logic
-io.on("connection", (socket) => {
-  socket.on("admin-join", () => {
-    if (game) {
-      socket.join("admin");
-      socket.emit("answers-update", {
-        round: game.round,
-        question: game.question,
-        answers: getAnswersForCurrentQ()
-      });
-    }
-  });
-
-  socket.on("player-join", ({ username }) => {
-    socket.join("players");
-  });
-
-  socket.on("next-question", () => {
-    if (game) {
-      game.question += 1;
-      io.to("players").emit("question-update", {
-        round: game.round,
-        question: game.question
-      });
-    }
-  });
-
-  socket.on("next-round", () => {
-    if (game) {
-      game.round += 1;
-      game.question = 1;
-      io.to("players").emit("question-update", {
-        round: game.round,
-        question: game.question
-      });
-    }
-  });
-
-  socket.on("submit-answer", ({ username, answer }) => {
-    if (!game) return;
-    const key = `round${game.round}-question${game.question}`;
-    if (!game.answers[key]) game.answers[key] = [];
-    game.answers[key].push({ username, answer });
-
-    io.to("admin").emit("answers-update", {
-      round: game.round,
-      question: game.question,
-      answers: getAnswersForCurrentQ()
-    });
-  });
-});
-
-function getAnswersForCurrentQ() {
-  const key = `round${game.round}-question${game.question}`;
-  return game.answers[key] || [];
+function createPin() {
+  return Math.floor(1000 + Math.random() * 9000).toString();
 }
+
+io.on("connection", (socket) => {
+  console.log("Client connected");
+
+  // Admin creates game
+  socket.on("createGame", () => {
+    game.pin = createPin();
+    game.players = [];
+    game.answers = {};
+    game.currentRound = 1;
+    game.currentQuestion = 1;
+    io.emit("gameCreated", game.pin);
+  });
+
+  // Player joins
+  socket.on("joinGame", ({ pin, username }) => {
+    if (pin === game.pin && !game.players.includes(username)) {
+      game.players.push(username);
+      socket.username = username;
+      socket.emit("joined", { success: true, round: game.currentRound, question: game.currentQuestion });
+      io.emit("playerList", game.players);
+    } else {
+      socket.emit("joined", { success: false });
+    }
+  });
+
+  // Player answers
+  socket.on("submitAnswer", (answer) => {
+    const { currentRound, currentQuestion, pin } = game;
+    if (!game.answers[currentRound]) {
+      game.answers[currentRound] = {};
+    }
+    if (!game.answers[currentRound][currentQuestion]) {
+      game.answers[currentRound][currentQuestion] = {};
+    }
+    game.answers[currentRound][currentQuestion][socket.username] = answer;
+    io.emit("answersUpdated", game.answers);
+  });
+
+  // Admin moves to next question
+  socket.on("nextQuestion", () => {
+    const { currentRound, currentQuestion, players, answers } = game;
+
+    // Fill in NO ANSWER for missing players
+    if (!answers[currentRound]) answers[currentRound] = {};
+    if (!answers[currentRound][currentQuestion]) answers[currentRound][currentQuestion] = {};
+    players.forEach(player => {
+      if (!answers[currentRound][currentQuestion][player]) {
+        answers[currentRound][currentQuestion][player] = "NO ANSWER";
+      }
+    });
+
+    game.currentQuestion++;
+    io.emit("gameProgress", {
+      round: game.currentRound,
+      question: game.currentQuestion
+    });
+    io.emit("answersUpdated", game.answers);
+  });
+
+  // Admin moves to next round
+  socket.on("nextRound", () => {
+    const { currentRound, currentQuestion, players, answers } = game;
+
+    // Fill NO ANSWER for current question before moving on
+    if (!answers[currentRound]) answers[currentRound] = {};
+    if (!answers[currentRound][currentQuestion]) answers[currentRound][currentQuestion] = {};
+    players.forEach(player => {
+      if (!answers[currentRound][currentQuestion][player]) {
+        answers[currentRound][currentQuestion][player] = "NO ANSWER";
+      }
+    });
+
+    game.currentRound++;
+    game.currentQuestion = 1;
+    io.emit("gameProgress", {
+      round: game.currentRound,
+      question: game.currentQuestion
+    });
+    io.emit("answersUpdated", game.answers);
+  });
+
+  socket.on("getGameState", () => {
+    socket.emit("answersUpdated", game.answers);
+    socket.emit("gameProgress", {
+      round: game.currentRound,
+      question: game.currentQuestion,
+      pin: game.pin
+    });
+    socket.emit("playerList", game.players);
+  });
+});
 
 server.listen(3011, () => {
   console.log("Server running on port 3011");

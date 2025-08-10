@@ -1,46 +1,77 @@
 const socket = io();
-const gamePinInput = document.getElementById("gamePin");
-const createGameBtn = document.getElementById("createGame");
-const nextQuestionBtn = document.getElementById("nextQuestion");
-const nextRoundBtn = document.getElementById("nextRound");
-const answersDiv = document.getElementById("answers");
+const answersContainer = document.getElementById("answers");
+const pinDisplay = document.getElementById("pin");
+const playerList = document.getElementById("players");
+const roundDisplay = document.getElementById("round");
+const questionDisplay = document.getElementById("question");
 
-let currentPin = null;
-
-async function loadGameState() {
-  const res = await fetch("/game-state");
-  if (res.ok) {
-    const data = await res.json();
-    currentPin = data.pin;
-    gamePinInput.value = currentPin;
-    socket.emit("admin-join");
-  }
-}
-
-// Load game state on page load
-loadGameState();
-
-createGameBtn.addEventListener("click", async () => {
-  const res = await fetch("/create-game", { method: "POST" });
-  const data = await res.json();
-  currentPin = data.pin;
-  gamePinInput.value = currentPin;
-  socket.emit("admin-join");
+document.getElementById("createGame").addEventListener("click", () => {
+  socket.emit("createGame");
 });
 
-nextQuestionBtn.addEventListener("click", () => {
-  socket.emit("next-question");
+document.getElementById("nextQuestion").addEventListener("click", () => {
+  socket.emit("nextQuestion");
 });
 
-nextRoundBtn.addEventListener("click", () => {
-  socket.emit("next-round");
+document.getElementById("nextRound").addEventListener("click", () => {
+  socket.emit("nextRound");
 });
 
-socket.on("answers-update", ({ round, question, answers }) => {
-  answersDiv.innerHTML = `<h3>Round ${round} - Question ${question}</h3>`;
-  answers.forEach(a => {
-    const p = document.createElement("p");
-    p.textContent = `${a.username}: ${a.answer}`;
-    answersDiv.appendChild(p);
+socket.on("gameCreated", (pin) => {
+  pinDisplay.textContent = `Game PIN: ${pin}`;
+});
+
+socket.on("playerList", (players) => {
+  playerList.innerHTML = "";
+  players.sort().forEach(player => {
+    const li = document.createElement("li");
+    li.textContent = player;
+    playerList.appendChild(li);
   });
 });
+
+socket.on("gameProgress", ({ round, question, pin }) => {
+  if (pin) pinDisplay.textContent = `Game PIN: ${pin}`;
+  roundDisplay.textContent = `Round: ${round}`;
+  questionDisplay.textContent = `Question: ${question}`;
+});
+
+socket.on("answersUpdated", (answers) => {
+  answersContainer.innerHTML = ""; // Clear before re-render
+
+  Object.keys(answers)
+    .sort((a, b) => Number(a) - Number(b)) // sort rounds numerically
+    .forEach(roundNum => {
+      const roundDiv = document.createElement("div");
+      roundDiv.className = "round-block";
+      roundDiv.innerHTML = `<h3>Round ${roundNum}</h3>`;
+
+      Object.keys(answers[roundNum])
+        .sort((a, b) => Number(a) - Number(b)) // sort questions numerically
+        .forEach(questionNum => {
+          const questionDiv = document.createElement("div");
+          questionDiv.className = "question-block";
+          questionDiv.innerHTML = `<h4>Question ${questionNum}</h4>`;
+
+          const ul = document.createElement("ul");
+
+          Object.entries(answers[roundNum][questionNum])
+            .sort(([nameA], [nameB]) => nameA.localeCompare(nameB)) // sort alphabetically
+            .forEach(([username, answer]) => {
+              const li = document.createElement("li");
+              li.textContent = `${username}: ${answer}`;
+              if (answer === "NO ANSWER") {
+                li.style.color = "red"; // highlight no answers
+              }
+              ul.appendChild(li);
+            });
+
+          questionDiv.appendChild(ul);
+          roundDiv.appendChild(questionDiv);
+        });
+
+      answersContainer.appendChild(roundDiv);
+    });
+});
+
+socket.emit("getGameState"); // Ask for latest state when page loads
