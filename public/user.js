@@ -17,7 +17,7 @@ joinGameBtn.addEventListener("click", async () => {
   currentPin = pinInput.value.trim();
   currentUsername = usernameInput.value.trim();
 
-  const res = await fetch("/join-game", {
+  const res = await fetch("/joingame", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ pin: currentPin, username: currentUsername })
