@@ -35,6 +35,13 @@ let username = getCookie('username') || '';
 document.getElementById('pin').value = currentPin;
 document.getElementById('username').value = username;
 
+// If both PIN and username exist, auto-join the game
+if (currentPin && username) {
+  socket.emit('joinGame', { pin: currentPin, username, userId });
+  joinForm.style.display = 'none';
+  gameArea.style.display = 'block';
+}
+
 joinForm.addEventListener('submit', (e) => {
   e.preventDefault();
   currentPin = document.getElementById('pin').value.trim();

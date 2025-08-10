@@ -37,7 +37,15 @@ io.on("connection", (socket) => {
 
   // Player joins
   socket.on("joinGame", ({ pin, username, userId }) => {
-    if (pin === game.pin && userId && (!Object.values(userIdToUsername).includes(username) || userIdToUsername[userId] === username)) {
+    // Only allow join if userId is present and matches username (or is new)
+    if (
+      pin === game.pin &&
+      userId &&
+      (
+        (userIdToUsername[userId] === undefined) || // new userId
+        (userIdToUsername[userId] === username)     // or matches username
+      )
+    ) {
       userIdToUsername[userId] = username;
       if (!game.players.includes(userId)) {
         game.players.push(userId);
@@ -54,18 +62,24 @@ io.on("connection", (socket) => {
 
   // Player answers
   socket.on("submitAnswer", (data) => {
-    const { currentRound, currentQuestion, pin } = game;
-    const { userId, answer } = data;
-    const username = userIdToUsername[userId];
-    if (!username) return;
-    if (!game.answers[currentRound]) {
-      game.answers[currentRound] = {};
+    const { currentRound, currentQuestion } = game;
+    const { userId, answer, username } = data;
+    // Only accept if userId is present and matches username
+    if (
+      typeof userId === "string" &&
+      userIdToUsername[userId] === username &&
+      answer !== undefined
+    ) {
+      if (!game.answers[currentRound]) {
+        game.answers[currentRound] = {};
+      }
+      if (!game.answers[currentRound][currentQuestion]) {
+        game.answers[currentRound][currentQuestion] = {};
+      }
+      game.answers[currentRound][currentQuestion][username] = answer;
+      io.emit("answersUpdated", game.answers);
     }
-    if (!game.answers[currentRound][currentQuestion]) {
-      game.answers[currentRound][currentQuestion] = {};
-    }
-    game.answers[currentRound][currentQuestion][username] = answer;
-    io.emit("answersUpdated", game.answers);
+    // else: ignore invalid/forged submissions
   });
 
   // Admin moves to next question
