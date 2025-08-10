@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Quiz Player</title>
+  <title>Pub Quiz - User</title>
 </head>
 <body>
-  <h1>Join Quiz</h1>
-  
-  <div id="joinSection">
-    <label>PIN: <input id="pin" type="text" /></label>
-    <label>Username: <input id="username" type="text" /></label>
-    <button id="joinGame">Join</button>
-  </div>
+  <h1>Join Game</h1>
+  <form id="joinForm">
+    <label>PIN: <input type="text" id="pin" required></label><br>
+    <label>Username: <input type="text" id="username" required></label><br>
+    <button type="submit">Join</button>
+  </form>
 
-  <div id="quizSection" style="display:none;">
-    <h2 id="questionHeader">Waiting for question...</h2>
-    <input id="answerInput" type="text" placeholder="Your answer" />
-    <button id="submitAnswer">Submit Answer</button>
+  <div id="gameArea" style="display:none;">
+    <h2 id="questionTitle">Waiting for question...</h2>
+    <form id="answerForm">
+      <input type="text" id="answer" placeholder="Your answer">
+      <button type="submit">Submit Answer</button>
+    </form>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>

@@ -1,49 +1,39 @@
 const socket = io();
 
-const joinSection = document.getElementById("joinSection");
-const quizSection = document.getElementById("quizSection");
-const pinInput = document.getElementById("pin");
-const usernameInput = document.getElementById("username");
-const joinGameBtn = document.getElementById("joinGame");
+const joinForm = document.getElementById('joinForm');
+const gameArea = document.getElementById('gameArea');
+const questionTitle = document.getElementById('questionTitle');
+const answerForm = document.getElementById('answerForm');
 
-const questionHeader = document.getElementById("questionHeader");
-const answerInput = document.getElementById("answerInput");
-const submitAnswerBtn = document.getElementById("submitAnswer");
+let currentPin = '';
+let username = '';
 
-let currentPin = null;
-let currentUsername = null;
+joinForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  currentPin = document.getElementById('pin').value.trim();
+  username = document.getElementById('username').value.trim();
+  if (!currentPin || !username) return;
 
-joinGameBtn.addEventListener("click", async () => {
-  currentPin = pinInput.value.trim();
-  currentUsername = usernameInput.value.trim();
+  socket.emit('joinGame', { pin: currentPin, username });
+});
 
-  const res = await fetch("/joingame", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ pin: currentPin, username: currentUsername })
-  });
-
-  if (res.ok) {
-    joinSection.style.display = "none";
-    quizSection.style.display = "block";
-    socket.emit("player-join", { pin: currentPin, username: currentUsername });
+socket.on('joinedGame', (data) => {
+  if (data.success) {
+    joinForm.style.display = 'none';
+    gameArea.style.display = 'block';
   } else {
-    alert("Game not found");
+    alert(data.message);
   }
 });
 
-submitAnswerBtn.addEventListener("click", () => {
-  const answer = answerInput.value.trim();
-  if (answer) {
-    socket.emit("submit-answer", {
-      pin: currentPin,
-      username: currentUsername,
-      answer
-    });
-    answerInput.value = "";
-  }
+socket.on('newQuestion', (question) => {
+  questionTitle.textContent = `Question: ${question}`;
 });
 
-socket.on("question-update", ({ round, question }) => {
-  questionHeader.textContent = `Round ${round} - Question ${question}`;
+answerForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const answer = document.getElementById('answer').value.trim();
+  if (!answer) return;
+  socket.emit('submitAnswer', { pin: currentPin, username, answer });
+  document.getElementById('answer').value = '';
 });
