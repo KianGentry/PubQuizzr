@@ -59,7 +59,8 @@ socket.on("answersUpdated", (answers) => {
             .sort(([nameA], [nameB]) => nameA.localeCompare(nameB)) // sort alphabetically
             .forEach(([username, answer]) => {
               const li = document.createElement("li");
-              li.textContent = `${username}: ${answer}`;
+              // Fix: display answer as string, not [object Object]
+              li.textContent = `${username}: ${typeof answer === 'object' ? JSON.stringify(answer) : answer}`;
               if (answer === "NO ANSWER") {
                 li.style.color = "red"; // highlight no answers
               }

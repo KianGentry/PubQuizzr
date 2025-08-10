@@ -46,8 +46,10 @@ io.on("connection", (socket) => {
   });
 
   // Player answers
-  socket.on("submitAnswer", (answer) => {
+  socket.on("submitAnswer", (data) => {
     const { currentRound, currentQuestion, pin } = game;
+    // Fix: store only the answer string, not the whole object
+    const answer = data.answer;
     if (!game.answers[currentRound]) {
       game.answers[currentRound] = {};
     }
