@@ -22,6 +22,11 @@ function generateUserId() {
 
 // User identity
 let userId = getCookie('userId');
+function clearUserCookies() {
+  setCookie('userId', '', -1);
+  setCookie('pin', '', -1);
+  setCookie('username', '', -1);
+}
 if (!userId) {
   userId = generateUserId();
   setCookie('userId', userId);
@@ -42,23 +47,7 @@ if (currentPin && username) {
   gameArea.style.display = 'block';
 }
 
-joinForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  currentPin = document.getElementById('pin').value.trim();
-  username = document.getElementById('username').value.trim();
-  if (!currentPin || !username) return;
-
-  // Store in cookies
-  setCookie('pin', currentPin);
-  setCookie('username', username);
-
-  socket.emit('joinGame', { pin: currentPin, username, userId });
-
-  // Immediately show game area and hide join form
-  joinForm.style.display = 'none';
-  gameArea.style.display = 'block';
-});
-
+// Listen for join result and handle invalid userId
 socket.on('joinedGame', (data) => {
   if (data.success) {
     // ...existing code...
@@ -66,6 +55,14 @@ socket.on('joinedGame', (data) => {
     // If join failed, revert UI and show error
     gameArea.style.display = 'none';
     joinForm.style.display = 'block';
+    // If we tried to auto-join and failed, clear cookies (invalid userId)
+    if (userId) {
+      clearUserCookies();
+      userId = generateUserId();
+      setCookie('userId', userId);
+      document.getElementById('pin').value = '';
+      document.getElementById('username').value = '';
+    }
     alert(data.message);
   }
 });
@@ -125,6 +122,9 @@ socket.on('answersUpdated', (answers) => {
 });
 
 // On auto-join, also request latest state to sync UI
+if (currentPin && username) {
+  socket.emit('getGameState');
+}
 if (currentPin && username) {
   socket.emit('getGameState');
 }
