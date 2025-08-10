@@ -16,6 +16,8 @@ let game = {
   currentQuestion: 1
 };
 
+let userIdToUsername = {}; // userId -> username
+
 function createPin() {
   return Math.floor(1000 + Math.random() * 9000).toString();
 }
@@ -34,12 +36,17 @@ io.on("connection", (socket) => {
   });
 
   // Player joins
-  socket.on("joinGame", ({ pin, username }) => {
-    if (pin === game.pin && !game.players.includes(username)) {
-      game.players.push(username);
+  socket.on("joinGame", ({ pin, username, userId }) => {
+    if (pin === game.pin && userId && (!Object.values(userIdToUsername).includes(username) || userIdToUsername[userId] === username)) {
+      userIdToUsername[userId] = username;
+      if (!game.players.includes(userId)) {
+        game.players.push(userId);
+      }
+      socket.userId = userId;
       socket.username = username;
       socket.emit("joined", { success: true, round: game.currentRound, question: game.currentQuestion });
-      io.emit("playerList", game.players);
+      // Send player list as usernames
+      io.emit("playerList", Object.values(userIdToUsername));
     } else {
       socket.emit("joined", { success: false });
     }
@@ -48,15 +55,16 @@ io.on("connection", (socket) => {
   // Player answers
   socket.on("submitAnswer", (data) => {
     const { currentRound, currentQuestion, pin } = game;
-    // Fix: store only the answer string, not the whole object
-    const answer = data.answer;
+    const { userId, answer } = data;
+    const username = userIdToUsername[userId];
+    if (!username) return;
     if (!game.answers[currentRound]) {
       game.answers[currentRound] = {};
     }
     if (!game.answers[currentRound][currentQuestion]) {
       game.answers[currentRound][currentQuestion] = {};
     }
-    game.answers[currentRound][currentQuestion][socket.username] = answer;
+    game.answers[currentRound][currentQuestion][username] = answer;
     io.emit("answersUpdated", game.answers);
   });
 
@@ -67,9 +75,10 @@ io.on("connection", (socket) => {
     // Fill in NO ANSWER for missing players
     if (!answers[currentRound]) answers[currentRound] = {};
     if (!answers[currentRound][currentQuestion]) answers[currentRound][currentQuestion] = {};
-    players.forEach(player => {
-      if (!answers[currentRound][currentQuestion][player]) {
-        answers[currentRound][currentQuestion][player] = "NO ANSWER";
+    players.forEach(userId => {
+      const username = userIdToUsername[userId];
+      if (username && !answers[currentRound][currentQuestion][username]) {
+        answers[currentRound][currentQuestion][username] = "NO ANSWER";
       }
     });
 
@@ -79,7 +88,6 @@ io.on("connection", (socket) => {
       question: game.currentQuestion
     });
     io.emit("answersUpdated", game.answers);
-    // Emit newQuestion event to users
     io.emit("newQuestion", {
       round: game.currentRound,
       question: game.currentQuestion
@@ -93,9 +101,10 @@ io.on("connection", (socket) => {
     // Fill NO ANSWER for current question before moving on
     if (!answers[currentRound]) answers[currentRound] = {};
     if (!answers[currentRound][currentQuestion]) answers[currentRound][currentQuestion] = {};
-    players.forEach(player => {
-      if (!answers[currentRound][currentQuestion][player]) {
-        answers[currentRound][currentQuestion][player] = "NO ANSWER";
+    players.forEach(userId => {
+      const username = userIdToUsername[userId];
+      if (username && !answers[currentRound][currentQuestion][username]) {
+        answers[currentRound][currentQuestion][username] = "NO ANSWER";
       }
     });
 
@@ -106,7 +115,6 @@ io.on("connection", (socket) => {
       question: game.currentQuestion
     });
     io.emit("answersUpdated", game.answers);
-    // Emit newQuestion event to users
     io.emit("newQuestion", {
       round: game.currentRound,
       question: game.currentQuestion
@@ -120,8 +128,10 @@ io.on("connection", (socket) => {
       question: game.currentQuestion,
       pin: game.pin
     });
-    socket.emit("playerList", game.players);
+    socket.emit("playerList", Object.values(userIdToUsername));
   });
+
+  // Optionally: handle disconnects and cleanup
 });
 
 server.listen(3011, () => {

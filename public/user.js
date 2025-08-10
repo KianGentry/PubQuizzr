@@ -7,8 +7,33 @@ const answerForm = document.getElementById('answerForm');
 const answerInput = document.getElementById('answer');
 const answerButton = answerForm.querySelector('button');
 
-let currentPin = '';
-let username = '';
+// Helper functions for cookies
+function setCookie(name, value, days = 7) {
+  const expires = new Date(Date.now() + days*24*60*60*1000).toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+}
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+function generateUserId() {
+  return 'u_' + Math.random().toString(36).substr(2, 12);
+}
+
+// User identity
+let userId = getCookie('userId');
+if (!userId) {
+  userId = generateUserId();
+  setCookie('userId', userId);
+}
+
+// Try to restore PIN and username from cookies
+let currentPin = getCookie('pin') || '';
+let username = getCookie('username') || '';
+
+// Auto-fill join form if cookies exist
+document.getElementById('pin').value = currentPin;
+document.getElementById('username').value = username;
 
 joinForm.addEventListener('submit', (e) => {
   e.preventDefault();
@@ -16,7 +41,11 @@ joinForm.addEventListener('submit', (e) => {
   username = document.getElementById('username').value.trim();
   if (!currentPin || !username) return;
 
-  socket.emit('joinGame', { pin: currentPin, username });
+  // Store in cookies
+  setCookie('pin', currentPin);
+  setCookie('username', username);
+
+  socket.emit('joinGame', { pin: currentPin, username, userId });
 
   // Immediately show game area and hide join form
   joinForm.style.display = 'none';
@@ -38,7 +67,7 @@ answerForm.addEventListener('submit', (e) => {
   e.preventDefault();
   const answer = answerInput.value.trim();
   if (!answer) return;
-  socket.emit('submitAnswer', { pin: currentPin, username, answer });
+  socket.emit('submitAnswer', { pin: currentPin, username, userId, answer });
   answerInput.value = '';
   // Disable input and button after submitting
   answerInput.disabled = true;
