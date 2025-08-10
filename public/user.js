@@ -26,11 +26,6 @@ socket.on('joinedGame', (data) => {
   }
 });
 
-socket.on('newQuestion', (question) => {
-  questionTitle.textContent = question;
-  answerForm.style.display = 'block';
-});
-
 answerForm.addEventListener('submit', (e) => {
   e.preventDefault();
   const answer = document.getElementById('answer').value.trim();

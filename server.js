@@ -44,14 +44,6 @@ io.on("connection", (socket) => {
       socket.emit("joined", { success: false });
     }
   });
-  // Admin starts game
-    socket.on('startGame', ({ pin }) => {
-    const game = games[pin];
-    if (game) {
-        // Send first question prompt
-        io.to(pin).emit('newQuestion', 'Question 1: (ask verbally)');
-    }
-    });
 
   // Player answers
   socket.on("submitAnswer", (answer) => {
