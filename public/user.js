@@ -43,7 +43,7 @@ document.getElementById('username').value = username;
 // If both PIN and username exist, auto-join the game
 if (currentPin && username) {
   socket.emit('joinGame', { pin: currentPin, username, userId });
-  joinForm.style.display = 'none';
+  joinForm.style.display = 'none';  
   gameArea.style.display = 'block';
 }
 
