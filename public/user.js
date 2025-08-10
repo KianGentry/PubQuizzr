@@ -48,7 +48,7 @@ if (currentPin && username) {
 }
 
 // Listen for join result and handle invalid userId
-socket.on('joinedGame', (data) => {
+socket.on('joined', (data) => {
   if (data.success) {
     // ...existing code...
   } else {
