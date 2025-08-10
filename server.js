@@ -76,8 +76,12 @@ io.on("connection", (socket) => {
       if (!game.answers[currentRound][currentQuestion]) {
         game.answers[currentRound][currentQuestion] = {};
       }
-      game.answers[currentRound][currentQuestion][username] = answer;
-      io.emit("answersUpdated", game.answers);
+      // Prevent duplicate answers
+      if (game.answers[currentRound][currentQuestion][username] === undefined) {
+        game.answers[currentRound][currentQuestion][username] = answer;
+        io.emit("answersUpdated", game.answers);
+      }
+      // else: ignore duplicate submissions
     }
     // else: ignore invalid/forged submissions
   });

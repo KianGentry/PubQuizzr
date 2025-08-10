@@ -81,13 +81,48 @@ answerForm.addEventListener('submit', (e) => {
   answerButton.disabled = true;
 });
 
+// Track current round/question for answer check
+let currentRoundNum = 1;
+let currentQuestionNum = 1;
+
+// Helper to check if user has already answered and update UI
+function updateAnswerInputState(answers) {
+  // answers: { roundNum: { questionNum: { username: answer } } }
+  const round = answers && answers[currentRoundNum];
+  const question = round && round[currentQuestionNum];
+  if (question && question[username] !== undefined) {
+    answerInput.disabled = true;
+    answerButton.disabled = true;
+    answerInput.value = '';
+  } else {
+    answerInput.disabled = false;
+    answerButton.disabled = false;
+  }
+}
+
 // Listen for new question event to re-enable answer input/button
 socket.on('newQuestion', (data) => {
-  // Update question title with round and question number
+  currentRoundNum = data.round;
+  currentQuestionNum = data.question;
   questionTitle.textContent = `Round ${data.round} - Question ${data.question}`;
-  answerInput.disabled = false;
-  answerButton.disabled = false;
-  answerInput.value = '';
+  // We'll check answer state on next answersUpdated event
 });
 
-// ...existing code...
+// Always update question title on gameProgress as well
+socket.on('gameProgress', (data) => {
+  if (data.round && data.question) {
+    currentRoundNum = data.round;
+    currentQuestionNum = data.question;
+    questionTitle.textContent = `Round ${data.round} - Question ${data.question}`;
+  }
+});
+
+// Listen for answersUpdated to check if user already answered
+socket.on('answersUpdated', (answers) => {
+  updateAnswerInputState(answers);
+});
+
+// On auto-join, also request latest state to sync UI
+if (currentPin && username) {
+  socket.emit('getGameState');
+}
