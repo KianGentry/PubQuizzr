@@ -150,11 +150,15 @@ socket.on("gameResults", (results) => {
   // results: [{ username, points }]
   // Do not clear answersContainer, just append results at the top
   const resultsDiv = document.createElement("div");
+  resultsDiv.className = "final-results";
   resultsDiv.innerHTML = "<h2>Final Results</h2>";
   const ol = document.createElement("ol");
-  results.forEach(({ username, points }) => {
+  results.forEach(({ username, points }, idx) => {
     const li = document.createElement("li");
     li.textContent = `${username}: ${points} point${points === 1 ? "" : "s"}`;
+    if (idx === 0) li.classList.add("gold");
+    else if (idx === 1) li.classList.add("silver");
+    else if (idx === 2) li.classList.add("bronze");
     ol.appendChild(li);
   });
   resultsDiv.appendChild(ol);
