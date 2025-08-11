@@ -158,10 +158,67 @@
     .final-results li.gold { color: var(--gold); }
     .final-results li.silver { color: var(--silver); }
     .final-results li.bronze { color: var(--bronze); }
+
+    .admin-pin-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(30,41,59,0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .admin-pin-modal-content {
+      background: var(--surface);
+      border-radius: 10px;
+      box-shadow: 0 2px 16px rgba(30,41,59,0.18);
+      padding: 32px 36px 24px 36px;
+      text-align: center;
+      min-width: 320px;
+    }
+    .admin-pin-modal-content h2 {
+      margin-top: 0;
+      color: var(--primary);
+      font-size: 2rem;
+      margin-bottom: 18px;
+    }
+    .admin-pin-modal-content input[type="password"] {
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border);
+      font-size: 1.2rem;
+      margin-bottom: 12px;
+      width: 80%;
+      background: var(--bg);
+      color: var(--text-main);
+      transition: border 0.2s;
+    }
+    .admin-pin-modal-content input[type="password"]:focus {
+      border: 1.5px solid var(--primary);
+      outline: none;
+    }
+    .admin-pin-modal-content button {
+      width: 100%;
+      margin: 0;
+      margin-top: 8px;
+    }
+    .admin-pin-error {
+      color: var(--danger);
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      min-height: 1.2em;
+    }
   </style>
 </head>
 <body>
-  <!--<h1>Admin Control Panel</h1>-->
+  <div id="adminPinModal" class="admin-pin-modal">
+    <div class="admin-pin-modal-content">
+      <h2>Admin Access</h2>
+      <div class="admin-pin-error" id="adminPinError"></div>
+      <input type="password" id="adminPinInput" placeholder="Enter admin PIN" autocomplete="off" />
+      <button id="adminPinSubmit">Unlock</button>
+    </div>
+  </div>
 
   <div class="admin-top">
     <div class="admin-controls">
@@ -185,5 +242,33 @@
   <div id="answers"></div>
 
   <script src="admin.js"></script>
+  <script>
+    // Hardcoded admin PIN
+    const ADMIN_PIN = "12345";
+    const modal = document.getElementById('adminPinModal');
+    const pinInput = document.getElementById('adminPinInput');
+    const pinError = document.getElementById('adminPinError');
+    const pinBtn = document.getElementById('adminPinSubmit');
+
+    function unlockAdmin() {
+      if (pinInput.value === ADMIN_PIN) {
+        modal.style.display = "none";
+        document.body.style.overflow = "";
+      } else {
+        pinError.textContent = "Incorrect PIN. Try again.";
+        pinInput.value = "";
+        pinInput.focus();
+      }
+    }
+
+    pinBtn.onclick = unlockAdmin;
+    pinInput.onkeydown = function(e) {
+      if (e.key === "Enter") unlockAdmin();
+    };
+    window.onload = function() {
+      pinInput.focus();
+      document.body.style.overflow = "hidden";
+    };
+  </script>
 </body>
 </html>

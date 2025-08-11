@@ -51,6 +51,9 @@ socket.on('joined', (data) => {
   if (data.success) {
     joinForm.style.display = 'none';
     gameArea.style.display = 'block';
+    // Remove the 'Join Game' heading
+    const joinHeading = document.getElementById('joinHeading');
+    if (joinHeading) joinHeading.style.display = 'none';
     // ...existing code...
   } else {
     gameArea.style.display = 'none';
