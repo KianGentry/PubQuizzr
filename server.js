@@ -8,6 +8,11 @@ const io = new Server(server);
 
 app.use(express.static("public"));
 
+// Redirect root to user.html
+app.get("/", (req, res) => {
+  res.redirect("/user.html");
+});
+
 let game = {
   pin: null,
   players: [],
