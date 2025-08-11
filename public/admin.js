@@ -125,6 +125,23 @@ function renderAnswers(answers) {
     });
 }
 
+document.getElementById("finishGame").addEventListener("click", () => {
+  socket.emit("finishGame");
+});
+
+// Show results when game is finished
+socket.on("gameResults", (results) => {
+  // results: [{ username, points }]
+  answersContainer.innerHTML = "<h2>Final Results</h2>";
+  const ol = document.createElement("ol");
+  results.forEach(({ username, points }) => {
+    const li = document.createElement("li");
+    li.textContent = `${username}: ${points} point${points === 1 ? "" : "s"}`;
+    ol.appendChild(li);
+  });
+  answersContainer.appendChild(ol);
+});
+
 // Listen for answersUpdated to render answers with latest points
 socket.on("answersUpdated", (answers) => {
   window.latestAnswers = answers;
@@ -134,6 +151,12 @@ socket.on("answersUpdated", (answers) => {
 // Listen for pointsUpdated to update points and re-render answers
 socket.on("pointsUpdated", (points) => {
   window.latestPoints = points;
+  // Re-render answers with updated points
+  if (window.latestAnswers) renderAnswers(window.latestAnswers);
+});
+
+socket.emit("getGameState"); // Ask for latest state when page loads
+socket.emit("getGameState"); // Ask for latest state when page loads
   // Re-render answers with updated points
   if (window.latestAnswers) renderAnswers(window.latestAnswers);
 });

@@ -185,6 +185,25 @@ io.on("connection", (socket) => {
     });
   });
 
+  // Finish game and send results
+  socket.on("finishGame", () => {
+    // Calculate total points per username
+    const totals = {};
+    Object.keys(game.points).forEach(roundNum => {
+      Object.keys(game.points[roundNum]).forEach(questionNum => {
+        Object.entries(game.points[roundNum][questionNum]).forEach(([username, pts]) => {
+          if (!totals[username]) totals[username] = 0;
+          totals[username] += Number(pts) || 0;
+        });
+      });
+    });
+    // Prepare sorted results
+    const results = Object.entries(totals)
+      .map(([username, points]) => ({ username, points }))
+      .sort((a, b) => b.points - a.points);
+    io.emit("gameResults", results);
+  });
+
   socket.on("getGameState", () => {
     socket.emit("answersUpdated", game.answers);
     socket.emit("gameProgress", {
