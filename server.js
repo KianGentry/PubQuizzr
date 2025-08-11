@@ -81,7 +81,7 @@ io.on("connection", (socket) => {
       // Send player list as usernames
       io.emit("playerList", Object.values(userIdToUsername));
     } else {
-      socket.emit("joined", { success: false, message: "Invalid join attempt." });
+      // socket.emit("joined", { success: false, message: "Invalid join attempt." });
     }
   });
 
