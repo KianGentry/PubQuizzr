@@ -256,8 +256,8 @@
   </div>
 
   <script>
-    // Hardcoded admin PIN
-    const ADMIN_PIN = "3389";
+    // Use environment variable for admin PIN if available, fallback to default
+    const ADMIN_PIN = window.ADMIN_PIN || "3389";
     const modal = document.getElementById('adminPinModal');
     const pinInput = document.getElementById('adminPinInput');
     const pinError = document.getElementById('adminPinError');

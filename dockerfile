@@ -12,6 +12,9 @@ RUN npm install
 # Copy all app files
 COPY . .
 
+# Serve ADMIN_PIN as a JS variable for the frontend
+RUN echo "window.ADMIN_PIN = '\"${ADMIN_PIN}\"';" > ./public/admin-pin.js || true
+
 # Expose the port
 EXPOSE 3011
 

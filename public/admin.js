@@ -1,3 +1,5 @@
+window.ADMIN_PIN = typeof ADMIN_PIN !== "undefined" ? ADMIN_PIN : undefined;
+
 const socket = io();
 const answersContainer = document.getElementById("answers");
 const pinDisplay = document.getElementById("pin");

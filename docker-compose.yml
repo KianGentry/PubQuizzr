@@ -8,3 +8,5 @@ services:
     stdin_open: true
     container_name: pubquizzr
     tty: true
+    environment:
+      - ADMIN_PIN=3398
