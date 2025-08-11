@@ -162,11 +162,11 @@
     .admin-pin-modal {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(30,41,59,0.18);
+      background: var(--bg);
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
+      z-index: 10000;
     }
     .admin-pin-modal-content {
       background: var(--surface);
@@ -208,6 +208,13 @@
       margin-bottom: 8px;
       min-height: 1.2em;
     }
+    /* Hide main content until unlocked */
+    .admin-content-locked {
+      display: none;
+    }
+    .admin-content-unlocked {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -220,28 +227,28 @@
     </div>
   </div>
 
-  <div class="admin-top">
-    <div class="admin-controls">
-      <p id="pin">Game PIN: Not started</p>
-      <p id="round">Round: -</p>
-      <p id="question">Question: -</p>
+  <div id="adminContent" class="admin-content-locked">
+    <div class="admin-top">
+      <div class="admin-controls">
+        <p id="pin">Game PIN: Not started</p>
+        <p id="round">Round: -</p>
+        <p id="question">Question: -</p>
 
-      <button id="createGame">New Game</button>
-      <button id="nextRound">Next Round</button>
-      <button id="nextQuestion">Next Question</button>
-      <button id="finishGame">Finish Game</button>
+        <button id="createGame">New Game</button>
+        <button id="nextRound">Next Round</button>
+        <button id="nextQuestion">Next Question</button>
+        <button id="finishGame">Finish Game</button>
+      </div>
+      <div class="admin-players">
+        <h3>Players</h3>
+        <ul id="players"></ul>
+      </div>
     </div>
-    
-    <div class="admin-players">
-      <h3>Players</h3>
-      <ul id="players"></ul>
-    </div>
-  </div>
     <hr>
-  <h2>Answers</h2>
-  <div id="answers"></div>
+    <h2>Answers</h2>
+    <div id="answers"></div>
+  </div>
 
-  <script src="admin.js"></script>
   <script>
     // Hardcoded admin PIN
     const ADMIN_PIN = "12345";
@@ -249,11 +256,17 @@
     const pinInput = document.getElementById('adminPinInput');
     const pinError = document.getElementById('adminPinError');
     const pinBtn = document.getElementById('adminPinSubmit');
+    const adminContent = document.getElementById('adminContent');
 
     function unlockAdmin() {
       if (pinInput.value === ADMIN_PIN) {
         modal.style.display = "none";
+        adminContent.className = "admin-content-unlocked";
         document.body.style.overflow = "";
+        // Now load the admin.js script
+        var script = document.createElement('script');
+        script.src = "admin.js";
+        document.body.appendChild(script);
       } else {
         pinError.textContent = "Incorrect PIN. Try again.";
         pinInput.value = "";
