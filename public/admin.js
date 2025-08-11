@@ -155,11 +155,10 @@ socket.on("pointsUpdated", (points) => {
   if (window.latestAnswers) renderAnswers(window.latestAnswers);
 });
 
+// Only call getGameState once on page load
 socket.emit("getGameState"); // Ask for latest state when page loads
-socket.emit("getGameState"); // Ask for latest state when page loads
-  // Re-render answers with updated points
-  if (window.latestAnswers) renderAnswers(window.latestAnswers);
-});
+// Re-render answers with updated points
+if (window.latestAnswers) renderAnswers(window.latestAnswers);
 
 socket.emit("getGameState"); // Ask for latest state when page loads
 socket.emit("getGameState"); // Ask for latest state when page loads
