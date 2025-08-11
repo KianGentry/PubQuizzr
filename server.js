@@ -22,17 +22,34 @@ function createPin() {
   return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
+// Automatically create a game on server start
+function resetGame() {
+  game.pin = createPin();
+  game.players = [];
+  game.answers = {};
+  game.currentRound = 1;
+  game.currentQuestion = 1;
+  userIdToUsername = {};
+}
+resetGame();
+
 io.on("connection", (socket) => {
   console.log("Client connected");
 
-  // Admin creates game
+  // Immediately send the current PIN to admin and users on connect
+  socket.emit("gameCreated", game.pin);
+
+  // Admin creates game (reset)
   socket.on("createGame", () => {
-    game.pin = createPin();
-    game.players = [];
-    game.answers = {};
-    game.currentRound = 1;
-    game.currentQuestion = 1;
+    resetGame();
     io.emit("gameCreated", game.pin);
+    io.emit("playerList", []);
+    io.emit("answersUpdated", {});
+    io.emit("gameProgress", {
+      round: game.currentRound,
+      question: game.currentQuestion,
+      pin: game.pin
+    });
   });
 
   // Player joins

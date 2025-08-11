@@ -19,6 +19,11 @@ document.getElementById("nextRound").addEventListener("click", () => {
 
 socket.on("gameCreated", (pin) => {
   pinDisplay.textContent = `Game PIN: ${pin}`;
+  // Optionally clear player list and answers on reset
+  playerList.innerHTML = "";
+  answersContainer.innerHTML = "";
+  roundDisplay.textContent = "";
+  questionDisplay.textContent = "";
 });
 
 socket.on("playerList", (players) => {
