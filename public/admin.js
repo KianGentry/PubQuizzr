@@ -31,13 +31,19 @@ document.getElementById("finishGame").addEventListener("click", () => {
 socket.on("gameCreated", (pin) => {
   if (pin) {
     pinDisplay.textContent = `Game PIN: ${pin}`;
+    // Only clear everything when a new game is started
+    playerList.innerHTML = "";
+    answersContainer.innerHTML = "";
+    roundDisplay.textContent = "";
+    questionDisplay.textContent = "";
   } else {
     pinDisplay.textContent = "Game PIN: (Game Finished)";
+    // Do NOT clear answersContainer or results here
+    roundDisplay.textContent = "";
+    questionDisplay.textContent = "";
+    playerList.innerHTML = "";
+    // answersContainer is left untouched to preserve answers/results
   }
-  playerList.innerHTML = "";
-  answersContainer.innerHTML = "";
-  roundDisplay.textContent = "";
-  questionDisplay.textContent = "";
 });
 
 socket.on("playerList", (players) => {
