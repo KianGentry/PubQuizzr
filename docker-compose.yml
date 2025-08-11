@@ -9,4 +9,4 @@ services:
     container_name: pubquizzr
     tty: true
     environment:
-      - ADMIN_PIN=3398
+      - ADMIN_PIN=6041
