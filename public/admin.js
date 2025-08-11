@@ -70,40 +70,49 @@ socket.on("answersUpdated", (answers) => {
                 li.style.color = "red";
               }
 
-              // Add points input and button
-              const pointsInput = document.createElement("input");
-              pointsInput.type = "number";
-              pointsInput.min = "0";
-              pointsInput.style.width = "50px";
-              pointsInput.placeholder = "Points";
-              pointsInput.value = ""; // Will be filled if points exist
-
-              // If points already exist, show them
+              // Points display and buttons
+              let points = 0;
               if (
                 window.latestPoints &&
                 window.latestPoints[roundNum] &&
                 window.latestPoints[roundNum][questionNum] &&
                 window.latestPoints[roundNum][questionNum][username] !== undefined
               ) {
-                pointsInput.value = window.latestPoints[roundNum][questionNum][username];
+                points = window.latestPoints[roundNum][questionNum][username];
               }
 
-              const markBtn = document.createElement("button");
-              markBtn.textContent = "Set Points";
-              markBtn.type = "button";
-              markBtn.onclick = () => {
-                const pts = Number(pointsInput.value);
+              const pointsSpan = document.createElement("span");
+              pointsSpan.style.margin = "0 8px";
+              pointsSpan.textContent = `Points: ${points}`;
+
+              const incBtn = document.createElement("button");
+              incBtn.textContent = "+";
+              incBtn.type = "button";
+              incBtn.onclick = () => {
                 socket.emit("markAnswer", {
                   round: Number(roundNum),
                   question: Number(questionNum),
                   username,
-                  points: isNaN(pts) ? 0 : pts
+                  points: points + 1
+                });
+              };
+
+              const decBtn = document.createElement("button");
+              decBtn.textContent = "−";
+              decBtn.type = "button";
+              decBtn.onclick = () => {
+                socket.emit("markAnswer", {
+                  round: Number(roundNum),
+                  question: Number(questionNum),
+                  username,
+                  points: Math.max(0, points - 1)
                 });
               };
 
               li.appendChild(document.createTextNode(" "));
-              li.appendChild(pointsInput);
-              li.appendChild(markBtn);
+              li.appendChild(pointsSpan);
+              li.appendChild(incBtn);
+              li.appendChild(decBtn);
 
               ul.appendChild(li);
             });
