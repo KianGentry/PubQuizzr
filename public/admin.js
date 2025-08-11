@@ -41,18 +41,18 @@ socket.on("gameProgress", ({ round, question, pin }) => {
   questionDisplay.textContent = `Question: ${question}`;
 });
 
-socket.on("answersUpdated", (answers) => {
+function renderAnswers(answers) {
   answersContainer.innerHTML = ""; // Clear before re-render
 
   Object.keys(answers)
-    .sort((a, b) => Number(a) - Number(b)) // sort rounds numerically
+    .sort((a, b) => Number(a) - Number(b))
     .forEach(roundNum => {
       const roundDiv = document.createElement("div");
       roundDiv.className = "round-block";
       roundDiv.innerHTML = `<h3>Round ${roundNum}</h3>`;
 
       Object.keys(answers[roundNum])
-        .sort((a, b) => Number(a) - Number(b)) // sort questions numerically
+        .sort((a, b) => Number(a) - Number(b))
         .forEach(questionNum => {
           const questionDiv = document.createElement("div");
           questionDiv.className = "question-block";
@@ -61,7 +61,7 @@ socket.on("answersUpdated", (answers) => {
           const ul = document.createElement("ul");
 
           Object.entries(answers[roundNum][questionNum])
-            .sort(([nameA], [nameB]) => nameA.localeCompare(nameB)) // sort alphabetically
+            .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
             .forEach(([username, answer]) => {
               const li = document.createElement("li");
               li.textContent = `${username}: ${typeof answer === 'object' ? JSON.stringify(answer) : answer}`;
@@ -123,12 +123,19 @@ socket.on("answersUpdated", (answers) => {
 
       answersContainer.appendChild(roundDiv);
     });
+}
+
+// Listen for answersUpdated to render answers with latest points
+socket.on("answersUpdated", (answers) => {
+  window.latestAnswers = answers;
+  renderAnswers(answers);
 });
 
-// Listen for pointsUpdated to update points UI
+// Listen for pointsUpdated to update points and re-render answers
 socket.on("pointsUpdated", (points) => {
   window.latestPoints = points;
-  // Do NOT re-emit getGameState here; just let answersUpdated handle UI refresh
+  // Re-render answers with updated points
+  if (window.latestAnswers) renderAnswers(window.latestAnswers);
 });
 
 socket.emit("getGameState"); // Ask for latest state when page loads
