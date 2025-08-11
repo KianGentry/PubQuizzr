@@ -18,6 +18,9 @@ let game = {
 
 let userIdToUsername = {}; // userId -> username
 
+// Add points to the game state
+game.points = {}; // { roundNum: { questionNum: { username: points } } }
+
 function createPin() {
   return Math.floor(1000 + Math.random() * 9000).toString();
 }
@@ -27,6 +30,7 @@ function resetGame() {
   game.pin = createPin();
   game.players = [];
   game.answers = {};
+  game.points = {};
   game.currentRound = 1;
   game.currentQuestion = 1;
   userIdToUsername = {};
@@ -38,6 +42,9 @@ io.on("connection", (socket) => {
 
   // Immediately send the current PIN to admin and users on connect
   socket.emit("gameCreated", game.pin);
+
+  // Send current points on connect
+  socket.emit("pointsUpdated", game.points);
 
   // Admin creates game (reset)
   socket.on("createGame", () => {
@@ -81,7 +88,7 @@ io.on("connection", (socket) => {
       // Send player list as usernames
       io.emit("playerList", Object.values(userIdToUsername));
     } else {
-      // socket.emit("joined", { success: false, message: "Invalid join attempt." });
+      socket.emit("joined", { success: false, message: "Invalid join attempt." });
     }
   });
 
@@ -109,6 +116,20 @@ io.on("connection", (socket) => {
       // else: ignore duplicate submissions
     }
     // else: ignore invalid/forged submissions
+  });
+
+  // Mark answer with points
+  socket.on("markAnswer", ({ round, question, username, points }) => {
+    if (
+      typeof round === "number" &&
+      typeof question === "number" &&
+      typeof username === "string"
+    ) {
+      if (!game.points[round]) game.points[round] = {};
+      if (!game.points[round][question]) game.points[round][question] = {};
+      game.points[round][question][username] = points;
+      io.emit("pointsUpdated", game.points);
+    }
   });
 
   // Admin moves to next question
@@ -172,6 +193,7 @@ io.on("connection", (socket) => {
       pin: game.pin
     });
     socket.emit("playerList", Object.values(userIdToUsername));
+    socket.emit("pointsUpdated", game.points);
   });
 
   // Optionally: handle disconnects and cleanup

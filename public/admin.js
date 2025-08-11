@@ -64,11 +64,47 @@ socket.on("answersUpdated", (answers) => {
             .sort(([nameA], [nameB]) => nameA.localeCompare(nameB)) // sort alphabetically
             .forEach(([username, answer]) => {
               const li = document.createElement("li");
-              // Fix: display answer as string, not [object Object]
               li.textContent = `${username}: ${typeof answer === 'object' ? JSON.stringify(answer) : answer}`;
+
               if (answer === "NO ANSWER") {
-                li.style.color = "red"; // highlight no answers
+                li.style.color = "red";
               }
+
+              // Add points input and button
+              const pointsInput = document.createElement("input");
+              pointsInput.type = "number";
+              pointsInput.min = "0";
+              pointsInput.style.width = "50px";
+              pointsInput.placeholder = "Points";
+              pointsInput.value = ""; // Will be filled if points exist
+
+              // If points already exist, show them
+              if (
+                window.latestPoints &&
+                window.latestPoints[roundNum] &&
+                window.latestPoints[roundNum][questionNum] &&
+                window.latestPoints[roundNum][questionNum][username] !== undefined
+              ) {
+                pointsInput.value = window.latestPoints[roundNum][questionNum][username];
+              }
+
+              const markBtn = document.createElement("button");
+              markBtn.textContent = "Set Points";
+              markBtn.type = "button";
+              markBtn.onclick = () => {
+                const pts = Number(pointsInput.value);
+                socket.emit("markAnswer", {
+                  round: Number(roundNum),
+                  question: Number(questionNum),
+                  username,
+                  points: isNaN(pts) ? 0 : pts
+                });
+              };
+
+              li.appendChild(document.createTextNode(" "));
+              li.appendChild(pointsInput);
+              li.appendChild(markBtn);
+
               ul.appendChild(li);
             });
 
@@ -78,6 +114,13 @@ socket.on("answersUpdated", (answers) => {
 
       answersContainer.appendChild(roundDiv);
     });
+});
+
+// Listen for pointsUpdated to update points UI
+socket.on("pointsUpdated", (points) => {
+  window.latestPoints = points;
+  // Re-render answers to update points inputs
+  socket.emit("getGameState");
 });
 
 socket.emit("getGameState"); // Ask for latest state when page loads
