@@ -128,8 +128,8 @@ socket.on("answersUpdated", (answers) => {
 // Listen for pointsUpdated to update points UI
 socket.on("pointsUpdated", (points) => {
   window.latestPoints = points;
-  // Re-render answers to update points inputs
-  socket.emit("getGameState");
+  // Do NOT re-emit getGameState here; just let answersUpdated handle UI refresh
 });
 
+socket.emit("getGameState"); // Ask for latest state when page loads
 socket.emit("getGameState"); // Ask for latest state when page loads
