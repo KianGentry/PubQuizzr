@@ -7,7 +7,23 @@
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
     h1, h2 { margin-top: 0; }
-    button { margin: 5px; padding: 8px 12px; font-size: 16px; }
+    button {
+      margin: 5px;
+      padding: 10px 18px;
+      font-size: 18px;
+      border-radius: 6px;
+      border: none;
+      background: linear-gradient(90deg, #2a4d8f 60%, #3ca380 100%);
+      color: #fff;
+      font-weight: bold;
+      box-shadow: 0 2px 6px rgba(42,77,143,0.08);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    button:hover {
+      background: linear-gradient(90deg, #3ca380 60%, #2a4d8f 100%);
+      transform: translateY(-2px) scale(1.04);
+    }
     .round-block { border: 1px solid #ccc; margin: 4px 0; padding: 6px; }
     .question-block { margin-left: 10px; padding: 2px; }
     .question-block ul { margin: 2px 0 4px 14px; }
@@ -38,7 +54,15 @@
       color: #1b2c47;
       margin-bottom: 6px;
     }
-    /* Bigger player names */
+    /* Bigger player names and heading */
+    .admin-players h3 {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #2a4d8f;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      margin-top: 0;
+    }
     .admin-players ul {
       padding-left: 0;
     }
@@ -52,7 +76,7 @@
   </style>
 </head>
 <body>
-  <h1>Admin Control Panel</h1>
+  <!--<h1>Admin Control Panel</h1>-->
 
   <div class="admin-top">
     <div class="admin-controls">
