@@ -29,8 +29,11 @@ document.getElementById("finishGame").addEventListener("click", () => {
 });
 
 socket.on("gameCreated", (pin) => {
-  pinDisplay.textContent = `Game PIN: ${pin}`;
-  // Optionally clear player list and answers on reset
+  if (pin) {
+    pinDisplay.textContent = `Game PIN: ${pin}`;
+  } else {
+    pinDisplay.textContent = "Game PIN: (Game Finished)";
+  }
   playerList.innerHTML = "";
   answersContainer.innerHTML = "";
   roundDisplay.textContent = "";
@@ -139,14 +142,19 @@ function renderAnswers(answers) {
 // Show results when game is finished
 socket.on("gameResults", (results) => {
   // results: [{ username, points }]
-  answersContainer.innerHTML = "<h2>Final Results</h2>";
+  // Do not clear answersContainer, just append results at the top
+  const resultsDiv = document.createElement("div");
+  resultsDiv.innerHTML = "<h2>Final Results</h2>";
   const ol = document.createElement("ol");
   results.forEach(({ username, points }) => {
     const li = document.createElement("li");
     li.textContent = `${username}: ${points} point${points === 1 ? "" : "s"}`;
     ol.appendChild(li);
   });
-  answersContainer.appendChild(ol);
+  resultsDiv.appendChild(ol);
+
+  // Insert results above the answers
+  answersContainer.prepend(resultsDiv);
 });
 
 // Listen for answersUpdated to render answers with latest points

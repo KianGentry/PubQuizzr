@@ -134,6 +134,8 @@ io.on("connection", (socket) => {
 
   // Admin moves to next question
   socket.on("nextQuestion", () => {
+    // Prevent advancing if game is finished (PIN is null)
+    if (!game.pin) return;
     const { currentRound, currentQuestion, players, answers } = game;
 
     // Fill in NO ANSWER for missing players
@@ -160,6 +162,8 @@ io.on("connection", (socket) => {
 
   // Admin moves to next round
   socket.on("nextRound", () => {
+    // Prevent advancing if game is finished (PIN is null)
+    if (!game.pin) return;
     const { currentRound, currentQuestion, players, answers } = game;
 
     // Fill NO ANSWER for current question before moving on
@@ -201,7 +205,9 @@ io.on("connection", (socket) => {
     const results = Object.entries(totals)
       .map(([username, points]) => ({ username, points }))
       .sort((a, b) => b.points - a.points);
+    game.pin = null; // Clear the PIN to mark game as finished
     io.emit("gameResults", results);
+    io.emit("gameCreated", null); // Notify clients PIN is cleared
   });
 
   socket.on("getGameState", () => {
