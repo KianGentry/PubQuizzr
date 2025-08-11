@@ -5,8 +5,12 @@ const playerList = document.getElementById("players");
 const roundDisplay = document.getElementById("round");
 const questionDisplay = document.getElementById("question");
 
+// New Game confirmation
+document.getElementById("createGame").textContent = "New Game";
 document.getElementById("createGame").addEventListener("click", () => {
-  socket.emit("createGame");
+  if (confirm("Are you sure you want to start a new game? This will erase all players and answers.")) {
+    socket.emit("createGame");
+  }
 });
 
 document.getElementById("nextQuestion").addEventListener("click", () => {
@@ -15,6 +19,13 @@ document.getElementById("nextQuestion").addEventListener("click", () => {
 
 document.getElementById("nextRound").addEventListener("click", () => {
   socket.emit("nextRound");
+});
+
+// Finish Game confirmation
+document.getElementById("finishGame").addEventListener("click", () => {
+  if (confirm("Are you sure you want to finish the game and show the results?")) {
+    socket.emit("finishGame");
+  }
 });
 
 socket.on("gameCreated", (pin) => {
@@ -124,10 +135,6 @@ function renderAnswers(answers) {
       answersContainer.appendChild(roundDiv);
     });
 }
-
-document.getElementById("finishGame").addEventListener("click", () => {
-  socket.emit("finishGame");
-});
 
 // Show results when game is finished
 socket.on("gameResults", (results) => {

@@ -12,22 +12,39 @@
     .question-block { margin-left: 20px; padding: 5px; }
     .question-block ul { margin: 5px 0 10px 20px; }
     .question-block li { list-style-type: none; }
+    .admin-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 40px;
+      margin-bottom: 20px;
+    }
+    .admin-controls {
+      flex: 1;
+    }
+    .admin-players {
+      min-width: 180px;
+    }
   </style>
 </head>
 <body>
   <h2>Admin Control Panel</h2>
 
-  <p id="pin">Game PIN: Not started</p>
-  <p id="round">Round: -</p>
-  <p id="question">Question: -</p>
+  <div class="admin-top">
+    <div class="admin-controls">
+      <p id="pin">Game PIN: Not started</p>
+      <p id="round">Round: -</p>
+      <p id="question">Question: -</p>
 
-  <button id="createGame">Create Game</button>
-  <button id="nextRound">Next Round</button>
-  <button id="nextQuestion">Next Question</button>
-  <button id="finishGame">Finish Game</button>
-
-  <h3>Players</h3>
-  <ul id="players"></ul>
+      <button id="createGame">New Game</button>
+      <button id="nextRound">Next Round</button>
+      <button id="nextQuestion">Next Question</button>
+      <button id="finishGame">Finish Game</button>
+    </div>
+    <div class="admin-players">
+      <h3>Players</h3>
+      <ul id="players"></ul>
+    </div>
+  </div>
 
   <h3>Answers</h3>
   <div id="answers"></div>
