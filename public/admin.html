@@ -6,23 +6,48 @@
   <script src="/socket.io/socket.io.js"></script>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
-    h2 { margin-top: 0; }
+    h1, h2 { margin-top: 0; }
     button { margin: 5px; padding: 8px 12px; font-size: 16px; }
-    .round-block { border: 1px solid #ccc; margin: 4px 0; padding: 6px; } /* reduced margin/padding */
-    .question-block { margin-left: 10px; padding: 2px; } /* reduced margin/padding */
-    .question-block ul { margin: 2px 0 4px 14px; } /* reduced margin */
-    .question-block li { list-style-type: none; margin-bottom: 2px; } /* reduced spacing between answers */
+    .round-block { border: 1px solid #ccc; margin: 4px 0; padding: 6px; }
+    .question-block { margin-left: 10px; padding: 2px; }
+    .question-block ul { margin: 2px 0 4px 14px; }
+    .question-block li { list-style-type: none; margin-bottom: 2px; }
     .admin-top {
       display: flex;
       align-items: flex-start;
-      gap: 24px; /* reduced gap */
-      margin-bottom: 12px; /* reduced margin */
+      gap: 24px;
+      margin-bottom: 12px;
     }
     .admin-controls {
       flex: 1;
     }
     .admin-players {
       min-width: 140px;
+    }
+    /* Stylized Game PIN, Round, Question */
+    #pin {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #2a4d8f;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+    #round, #question {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #1b2c47;
+      margin-bottom: 6px;
+    }
+    /* Bigger player names */
+    .admin-players ul {
+      padding-left: 0;
+    }
+    .admin-players li {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #184d2a;
+      list-style: none;
     }
   </style>
 </head>
