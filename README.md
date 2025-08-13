@@ -13,6 +13,6 @@ Note: This app does not deal with questions, it is used to submit and score user
 7. Click 'New Game' to start a new game.
 
 ## Deployment
-Change the ==ADMIN PIN== in the compose file before building. ==Note:== this PIN is currently not stored securely.
+Change the __ADMIN PIN__ in the compose file before building. __Note:__ this PIN is currently not stored securely.
 
 Use ``docker compose up --build`` to run. Access port 3011 over HTTP.
