@@ -173,11 +173,11 @@ function renderAnswers(answers) {
           // Table header
           const thead = document.createElement("thead");
           const headerRow = document.createElement("tr");
-          ["Username", "Answer", "Points", "Controls"].forEach(text => {
+          ["Username", "Answer", "Points", "Set Points"].forEach(text => {
             const th = document.createElement("th");
             th.textContent = text;
             th.style.border = "1px solid #ccc";
-            th.style.padding = "4px";
+            th.style.padding = "2px";
             th.style.fontSize = "14px"; // Adjust font size
             headerRow.appendChild(th);
           });
@@ -196,7 +196,7 @@ function renderAnswers(answers) {
               const userCell = document.createElement("td");
               userCell.textContent = username;
               userCell.style.border = "1px solid #ccc";
-              userCell.style.padding = "4px";
+              userCell.style.padding = "0px";
               userCell.style.fontSize = "14px"; // Adjust font size
               row.appendChild(userCell);
 
