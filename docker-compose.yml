@@ -1,6 +1,9 @@
 services:
   pubquiz:
-    build: .
+    build:
+      context: .
+      args:
+        - ADMIN_PIN="6689"
     ports:
       - "3011:3011"
     volumes:
@@ -8,5 +11,3 @@ services:
     stdin_open: true
     container_name: pubquizzr
     tty: true
-    environment:
-      - ADMIN_PIN=6041
