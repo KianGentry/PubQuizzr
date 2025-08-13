@@ -264,6 +264,9 @@
   </div>
 
   <script>
+    document.write(5 + 6);
+    document.write(window.ADMIN_PIN);
+
     // Use environment variable for admin PIN if available, fallback to default
     const ADMIN_PIN = window.ADMIN_PIN || "3389";
     const modal = document.getElementById('adminPinModal');
@@ -282,8 +285,7 @@
         script.src = "admin.js";
         document.body.appendChild(script);
       } else {
-        pinError.textContent = "PIN is" + window.ADMIN_PIN;
-        //pinError.textContent = "Incorrect PIN. Try again.";
+        pinError.textContent = "Incorrect PIN. Try again.";
         pinInput.value = "";
         pinInput.focus();
       }
