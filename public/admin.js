@@ -121,8 +121,8 @@ function renderAnswers(answers) {
               if (answer === "NO ANSWER") {
                 answerCell.style.color = "red";
               }
-              answerCell.style.border = "1px solid #ccc";
-              answerCell.style.padding = "4px";
+              //answerCell.style.border = "1px solid #ccccccff";
+              //answerCell.style.padding = "4px";
               row.appendChild(answerCell);
 
               // Points cell
@@ -137,14 +137,14 @@ function renderAnswers(answers) {
               }
               const pointsCell = document.createElement("td");
               pointsCell.textContent = points;
-              pointsCell.style.border = "1px solid #ccc";
-              pointsCell.style.padding = "4px";
+              //pointsCell.style.border = "1px solid #ccc";
+              //pointsCell.style.padding = "4px";
               row.appendChild(pointsCell);
 
               // Controls cell
               const controlsCell = document.createElement("td");
-              controlsCell.style.border = "1px solid #ccc";
-              controlsCell.style.padding = "4px";
+              //controlsCell.style.border = "1px solid #ccc";
+              //controlsCell.style.padding = "4px";
 
               const incBtn = document.createElement("button");
               incBtn.textContent = "+";
