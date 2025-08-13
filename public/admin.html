@@ -282,7 +282,8 @@
         script.src = "admin.js";
         document.body.appendChild(script);
       } else {
-        pinError.textContent = "Incorrect PIN. Try again.";
+        pinError.textContent = "PIN is" + (window.ADMIN_PIN ? " incorrect." : " not set.");
+        //pinError.textContent = "Incorrect PIN. Try again.";
         pinInput.value = "";
         pinInput.focus();
       }
