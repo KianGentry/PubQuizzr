@@ -16,4 +16,4 @@ This app does not deal with questions, it is used to submit and score users' ans
 Change the __ADMIN PIN__ in the compose file before building. 
 > __Note:__ this PIN is currently not stored securely.
 
-Use ``docker compose up --build`` to run. Access port __3011__ over __HTTP__.
+Use ``docker compose up --build -d`` to run. Access is on port __3011__ over __HTTP__.
