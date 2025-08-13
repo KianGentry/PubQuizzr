@@ -1,7 +1,7 @@
 # PubQuizzr
 Open source pub quiz app. Inspired by Kahoot and similar apps, but made for pub quiz. 
 
-Note: This app does not deal with questions, it is used to submit and score users. Scoring is done manually.
+> This app does not deal with questions, it is used to submit and score users. Scoring is done manually.
 
 ## How to Use
 1. Log into the admin page at /admin.html using the PIN from the ``docker-compose.yml`` file.
@@ -13,6 +13,6 @@ Note: This app does not deal with questions, it is used to submit and score user
 7. Click 'New Game' to start a new game.
 
 ## Deployment
-Change the __ADMIN PIN__ in the compose file before building. __Note:__ this PIN is currently not stored securely.
+Change the __ADMIN PIN__ in the compose file before building. > __Note:__ this PIN is currently not stored securely.
 
-Use ``docker compose up --build`` to run. Access port 3011 over HTTP.
+Use ``docker compose up --build`` to run. Access port __3011__ over __HTTP__.
