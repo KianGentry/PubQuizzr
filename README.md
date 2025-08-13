@@ -1,7 +1,9 @@
 # PubQuizzr
-Open source pub quiz app. Inspired by Kahoot and similar apps, but made for pub style quizes.
+Open source pub quiz app. Inspired by Kahoot and similar apps, but made for pub style quizes. Fully browser based.
 
 This app does not deal with questions, it is used to submit and score users' answers. Marking is done by the admin for each answer and is fully manual. Think of it as a digital replacement for traditional answer sheets.
+
+__Note:__ This app is still in development. Please report any bugs or issues.
 
 ## How to Use
 1. Log into the admin page at ``/admin.html`` using the PIN from the ``docker-compose.yml`` file.
