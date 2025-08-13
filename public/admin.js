@@ -182,6 +182,44 @@ socket.on("pointsUpdated", (points) => {
   if (window.latestAnswers) renderAnswers(window.latestAnswers);
 });
 
+// Add Start Game button logic
+const startGameBtn = document.createElement("button");
+startGameBtn.id = "startGame";
+startGameBtn.textContent = "Start Game";
+startGameBtn.style.marginRight = "8px";
+document.getElementById("createGame").insertAdjacentElement("afterend", startGameBtn);
+
+startGameBtn.addEventListener("click", () => {
+  if (confirm("Start the game now? Players will be able to answer questions.")) {
+    socket.emit("startGame");
+    startGameBtn.disabled = true;
+  }
+});
+
+socket.on("gameStarted", () => {
+  startGameBtn.disabled = true;
+});
+
+// Enable Start Game button on new game
+socket.on("gameCreated", (pin) => {
+  if (pin) {
+    pinDisplay.textContent = `Game PIN: ${pin}`;
+    // Only clear everything when a new game is started
+    playerList.innerHTML = "";
+    answersContainer.innerHTML = "";
+    roundDisplay.textContent = "";
+    questionDisplay.textContent = "";
+  } else {
+    pinDisplay.textContent = "Game PIN: (Game Finished)";
+    // Do NOT clear answersContainer or results here
+    roundDisplay.textContent = "";
+    questionDisplay.textContent = "";
+    playerList.innerHTML = "";
+    // answersContainer is left untouched to preserve answers/results
+  }
+  startGameBtn.disabled = false;
+});
+
 // Only call getGameState once on page load
 socket.emit("getGameState"); // Ask for latest state when page loads
 // Re-render answers with updated points

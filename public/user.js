@@ -54,7 +54,10 @@ socket.on('joined', (data) => {
     // Remove the 'Join Game' heading
     const joinHeading = document.getElementById('joinHeading');
     if (joinHeading) joinHeading.style.display = 'none';
-    // ...existing code...
+    if (!gameStarted) {
+      questionTitle.textContent = "Waiting for host to start the game...";
+      answerForm.style.display = 'none';
+    }
   } else {
     gameArea.style.display = 'none';
     joinForm.style.display = 'block';
@@ -98,6 +101,7 @@ answerForm.addEventListener('submit', (e) => {
 let currentRoundNum = null;
 let currentQuestionNum = null;
 let latestAnswers = null;
+let gameStarted = false;
 
 // Helper to check if user has already answered and update UI
 function updateAnswerInputState() {
@@ -119,8 +123,16 @@ socket.on('newQuestion', (data) => {
   currentRoundNum = data.round;
   currentQuestionNum = data.question;
   questionTitle.textContent = `Round ${data.round} - Question ${data.question}`;
+  if (gameStarted) {
+    answerForm.style.display = '';
+  }
   updateAnswerInputState();
 });
+
+// Hide answer form if game not started
+if (!gameStarted) {
+  answerForm.style.display = 'none';
+}
 
 // Always update question title on gameProgress as well
 socket.on('gameProgress', (data) => {
@@ -136,6 +148,20 @@ socket.on('gameProgress', (data) => {
 socket.on('answersUpdated', (answers) => {
   latestAnswers = answers;
   updateAnswerInputState();
+});
+
+// Listen for gameStarted event
+socket.on('gameStarted', () => {
+  gameStarted = true;
+  // If already joined, show game area if not visible
+  if (gameArea.style.display !== 'block') {
+    joinForm.style.display = 'none';
+    gameArea.style.display = 'block';
+    const joinHeading = document.getElementById('joinHeading');
+    if (joinHeading) joinHeading.style.display = 'none';
+  }
+  // Remove waiting message if present
+  questionTitle.textContent = `Round ${currentRoundNum || 1} - Question ${currentQuestionNum || 1}`;
 });
 
 // On auto-join, also request latest state to sync UI

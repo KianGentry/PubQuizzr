@@ -23,8 +23,9 @@ let game = {
 
 let userIdToUsername = {}; // userId -> username
 
-// Add points to the game state
+// Add points and started flag to the game state
 game.points = {}; // { roundNum: { questionNum: { username: points } } }
+game.started = false;
 
 function createPin() {
   return Math.floor(1000 + Math.random() * 9000).toString();
@@ -38,6 +39,7 @@ function resetGame() {
   game.points = {};
   game.currentRound = 1;
   game.currentQuestion = 1;
+  game.started = false;
   userIdToUsername = {};
 }
 resetGame();
@@ -137,10 +139,20 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Admin starts the game
+  socket.on("startGame", () => {
+    game.started = true;
+    io.emit("gameStarted");
+    // Send first question to users
+    io.emit("newQuestion", {
+      round: game.currentRound,
+      question: game.currentQuestion
+    });
+  });
+
   // Admin moves to next question
   socket.on("nextQuestion", () => {
-    // Prevent advancing if game is finished (PIN is null)
-    if (!game.pin) return;
+    if (!game.pin || !game.started) return;
     const { currentRound, currentQuestion, players, answers } = game;
 
     // Fill in NO ANSWER for missing players
@@ -167,8 +179,7 @@ io.on("connection", (socket) => {
 
   // Admin moves to next round
   socket.on("nextRound", () => {
-    // Prevent advancing if game is finished (PIN is null)
-    if (!game.pin) return;
+    if (!game.pin || !game.started) return;
     const { currentRound, currentQuestion, players, answers } = game;
 
     // Fill NO ANSWER for current question before moving on
