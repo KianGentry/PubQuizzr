@@ -3,11 +3,9 @@ services:
     build:
       context: .
       args:
-        - ADMIN_PIN="6689"
+        ADMIN_PIN: 6689
     ports:
       - "3011:3011"
-    volumes:
-      - .:/app
     stdin_open: true
     container_name: pubquizzr
     tty: true
