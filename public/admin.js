@@ -178,6 +178,7 @@ function renderAnswers(answers) {
             th.textContent = text;
             th.style.border = "1px solid #ccc";
             th.style.padding = "4px";
+            th.style.fontSize = "14px"; // Adjust font size
             headerRow.appendChild(th);
           });
           thead.appendChild(headerRow);
@@ -196,6 +197,7 @@ function renderAnswers(answers) {
               userCell.textContent = username;
               userCell.style.border = "1px solid #ccc";
               userCell.style.padding = "4px";
+              userCell.style.fontSize = "14px"; // Adjust font size
               row.appendChild(userCell);
 
               // Answer cell
