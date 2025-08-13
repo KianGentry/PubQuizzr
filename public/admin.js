@@ -63,6 +63,7 @@ socket.on("gameProgress", ({ round, question, pin }) => {
   questionDisplay.textContent = `Question: ${question}`;
 });
 
+/*
 function renderAnswers(answers) {
   answersContainer.innerHTML = ""; // Clear before re-render
 
@@ -145,7 +146,130 @@ function renderAnswers(answers) {
 
       answersContainer.appendChild(roundDiv);
     });
+} */
+
+function renderAnswers(answers) {
+  answersContainer.innerHTML = ""; // Clear before re-render
+
+  Object.keys(answers)
+    .sort((a, b) => Number(a) - Number(b))
+    .forEach(roundNum => {
+      const roundDiv = document.createElement("div");
+      roundDiv.className = "round-block";
+      roundDiv.innerHTML = `<h3>Round ${roundNum}</h3>`;
+
+      Object.keys(answers[roundNum])
+        .sort((a, b) => Number(a) - Number(b))
+        .forEach(questionNum => {
+          const questionDiv = document.createElement("div");
+          questionDiv.className = "question-block";
+          questionDiv.innerHTML = `<h4>Question ${questionNum}</h4>`;
+
+          // Create table
+          const table = document.createElement("table");
+          table.style.borderCollapse = "collapse";
+          table.style.width = "100%";
+
+          // Table header
+          const thead = document.createElement("thead");
+          const headerRow = document.createElement("tr");
+          ["Username", "Answer", "Points", "Controls"].forEach(text => {
+            const th = document.createElement("th");
+            th.textContent = text;
+            th.style.border = "1px solid #ccc";
+            th.style.padding = "4px";
+            headerRow.appendChild(th);
+          });
+          thead.appendChild(headerRow);
+          table.appendChild(thead);
+
+          // Table body
+          const tbody = document.createElement("tbody");
+
+          Object.entries(answers[roundNum][questionNum])
+            .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
+            .forEach(([username, answer]) => {
+              const row = document.createElement("tr");
+
+              // Username cell
+              const userCell = document.createElement("td");
+              userCell.textContent = username;
+              userCell.style.border = "1px solid #ccc";
+              userCell.style.padding = "4px";
+              row.appendChild(userCell);
+
+              // Answer cell
+              const answerCell = document.createElement("td");
+              answerCell.textContent = typeof answer === 'object' ? JSON.stringify(answer) : answer;
+              if (answer === "NO ANSWER") {
+                answerCell.style.color = "red";
+              }
+              answerCell.style.border = "1px solid #ccc";
+              answerCell.style.padding = "4px";
+              row.appendChild(answerCell);
+
+              // Points cell
+              let points = 0;
+              if (
+                window.latestPoints &&
+                window.latestPoints[roundNum] &&
+                window.latestPoints[roundNum][questionNum] &&
+                window.latestPoints[roundNum][questionNum][username] !== undefined
+              ) {
+                points = window.latestPoints[roundNum][questionNum][username];
+              }
+              const pointsCell = document.createElement("td");
+              pointsCell.textContent = points;
+              pointsCell.style.border = "1px solid #ccc";
+              pointsCell.style.padding = "4px";
+              row.appendChild(pointsCell);
+
+              // Controls cell
+              const controlsCell = document.createElement("td");
+              controlsCell.style.border = "1px solid #ccc";
+              controlsCell.style.padding = "4px";
+
+              const incBtn = document.createElement("button");
+              incBtn.textContent = "+";
+              incBtn.type = "button";
+              incBtn.onclick = () => {
+                socket.emit("markAnswer", {
+                  round: Number(roundNum),
+                  question: Number(questionNum),
+                  username,
+                  points: points + 1
+                });
+              };
+
+              const decBtn = document.createElement("button");
+              decBtn.textContent = "−";
+              decBtn.type = "button";
+              decBtn.onclick = () => {
+                socket.emit("markAnswer", {
+                  round: Number(roundNum),
+                  question: Number(questionNum),
+                  username,
+                  points: Math.max(0, points - 1)
+                });
+              };
+
+              controlsCell.appendChild(incBtn);
+              controlsCell.appendChild(decBtn);
+              row.appendChild(controlsCell);
+
+              tbody.appendChild(row);
+            });
+
+          table.appendChild(tbody);
+          questionDiv.appendChild(table);
+          roundDiv.appendChild(questionDiv);
+        });
+
+      answersContainer.appendChild(roundDiv);
+    });
 }
+
+
 
 // Show results when game is finished
 socket.on("gameResults", (results) => {
