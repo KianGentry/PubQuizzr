@@ -4,8 +4,8 @@ Open source pub quiz app. Inspired by Kahoot and similar apps, but made for pub 
 This app does not deal with questions, it is used to submit and score users' answers. Marking is done by the admin for each answer and is fully manual. Think of it as a digital replacement for traditional answer sheets.
 
 ## How to Use
-1. Log into the admin page at /admin.html using the PIN from the ``docker-compose.yml`` file.
-2. Provide users the PIN and wait for them to join.
+1. Log into the admin page at ``/admin.html`` using the PIN from the ``docker-compose.yml`` file.
+2. Provide users the game PIN from the admin page and wait for them to join on the homepage.
 3. Click 'Start Game' once all users are joined.
 4. Read the question, then click 'Next Question' and 'Next Round' as appropriate.
 5. Scoring can be done either while the game is going or at the end.
