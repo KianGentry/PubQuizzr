@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PubQuizzr Load Test</title>
+  <meta charset="UTF-8">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --accent: #06b6d4;
+      --bg: #f3f6fa;
+      --surface: #fff;
+      --border: #e5e7eb;
+      --text-main: #1e293b;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: var(--bg);
+      color: var(--text-main);
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    .control-group {
+      background: var(--bg);
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    input, button {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+    button:hover {
+      background: var(--accent);
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .status {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--bg);
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--primary);
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+    .log {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 15px;
+      border-radius: 8px;
+      height: 300px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      margin-top: 20px;
+    }
+    .log-entry {
+      margin-bottom: 2px;
+    }
+    .log-success { color: var(--success); }
+    .log-error { color: var(--danger); }
+    .log-warning { color: var(--warning); }
+    .log-info { color: var(--accent); }
+    
+    /* Mobile-friendly styles */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+      
+      .container {
+        padding: 15px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+      }
+      
+      .controls {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      
+      .control-group {
+        padding: 10px;
+      }
+      
+      .status {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      
+      .stat-card {
+        padding: 10px;
+      }
+      
+      .stat-value {
+        font-size: 20px;
+      }
+      
+      .log {
+        height: 250px;
+        font-size: 11px;
+      }
+      
+      button {
+        font-size: 16px;
+        padding: 12px 16px;
+      }
+      
+      input {
+        font-size: 16px; /* prevents zoom on iOS */
+        padding: 10px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .container {
+        padding: 10px;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+      
+      .status {
+        grid-template-columns: 1fr;
+      }
+      
+      .log {
+        height: 200px;
+        font-size: 10px;
+      }
+      
+      button {
+        font-size: 14px;
+        padding: 10px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>PubQuizzr Load Test</h1>
+    
+    <div class="controls">
+      <div class="control-group">
+        <label>Server URL:</label>
+        <input type="text" id="serverUrl" value="http://localhost:3011" placeholder="http://localhost:3011">
+      </div>
+      <div class="control-group">
+        <label>Game PIN:</label>
+        <input type="text" id="gamePin" placeholder="Enter game PIN">
+      </div>
+      <div class="control-group">
+        <label>Number of Players:</label>
+        <input type="number" id="playerCount" value="10" min="1" max="100">
+      </div>
+      <div class="control-group">
+        <label>Answer Delay (ms):</label>
+        <input type="number" id="answerDelay" value="2000" min="500" max="10000">
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="startTest">Start Load Test</button>
+      <button id="stopTest" disabled>Stop Test</button>
+      <button id="clearLog">Clear Log</button>
+    </div>
+
+    <div class="status">
+      <div class="stat-card">
+        <div class="stat-value" id="connectedCount">0</div>
+        <div class="stat-label">Connected</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="joinedCount">0</div>
+        <div class="stat-label">Joined Game</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="answeredCount">0</div>
+        <div class="stat-label">Answered</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="errorCount">0</div>
+        <div class="stat-label">Errors</div>
+      </div>
+    </div>
+
+    <div class="log" id="log"></div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    class LoadTester {
+      constructor() {
+        this.players = [];
+        this.isRunning = false;
+        this.stats = {
+          connected: 0,
+          joined: 0,
+          answered: 0,
+          errors: 0
+        };
+        
+        this.setupEventListeners();
+      }
+
+      setupEventListeners() {
+        document.getElementById('startTest').onclick = () => this.startTest();
+        document.getElementById('stopTest').onclick = () => this.stopTest();
+        document.getElementById('clearLog').onclick = () => this.clearLog();
+      }
+
+      log(message, type = 'info') {
+        const logDiv = document.getElementById('log');
+        const entry = document.createElement('div');
+        entry.className = `log-entry log-${type}`;
+        entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        logDiv.appendChild(entry);
+        logDiv.scrollTop = logDiv.scrollHeight;
+      }
+
+      updateStats() {
+        document.getElementById('connectedCount').textContent = this.stats.connected;
+        document.getElementById('joinedCount').textContent = this.stats.joined;
+        document.getElementById('answeredCount').textContent = this.stats.answered;
+        document.getElementById('errorCount').textContent = this.stats.errors;
+      }
+
+      clearLog() {
+        document.getElementById('log').innerHTML = '';
+      }
+
+      async startTest() {
+        if (this.isRunning) return;
+        
+        const serverUrl = document.getElementById('serverUrl').value;
+        const gamePin = document.getElementById('gamePin').value;
+        const playerCount = parseInt(document.getElementById('playerCount').value);
+        const answerDelay = parseInt(document.getElementById('answerDelay').value);
+
+        if (!gamePin) {
+          alert('Please enter a game PIN');
+          return;
+        }
+
+        this.isRunning = true;
+        document.getElementById('startTest').disabled = true;
+        document.getElementById('stopTest').disabled = false;
+        
+        this.log(`Starting load test with ${playerCount} players`, 'info');
+        this.log(`Server: ${serverUrl}, PIN: ${gamePin}`, 'info');
+
+        // create players with staggered connection
+        for (let i = 0; i < playerCount; i++) {
+          setTimeout(() => {
+            this.createPlayer(i, serverUrl, gamePin, answerDelay);
+          }, i * 100); // stagger connections by 100ms
+        }
+      }
+
+      createPlayer(id, serverUrl, gamePin, answerDelay) {
+        const username = `TestPlayer${id + 1}`;
+        const socket = io(serverUrl);
+        
+        const player = {
+          id,
+          username,
+          socket,
+          connected: false,
+          joined: false,
+          answered: false,
+          currentRound: 0,
+          currentQuestion: 0,
+          userId: `test_${id}_${Date.now()}` // generate consistent userId once
+        };
+
+        this.players.push(player);
+
+        socket.on('connect', () => {
+          player.connected = true;
+          this.stats.connected++;
+          this.updateStats();
+          this.log(`Player ${username} connected`, 'success');
+          
+          // join game
+          console.log(`Bot ${username} attempting to join with PIN: ${gamePin}, userId: ${player.userId}`);
+          socket.emit('joinGame', { 
+            pin: gamePin, 
+            username, 
+            userId: player.userId 
+          });
+        });
+
+        socket.on('joined', (data) => {
+          if (data.success) {
+            player.joined = true;
+            this.stats.joined++;
+            this.updateStats();
+            this.log(`Player ${username} joined game`, 'success');
+          } else {
+            this.stats.errors++;
+            this.updateStats();
+            this.log(`Player ${username} failed to join: ${data.message}`, 'error');
+            console.log(`Join failed for ${username}:`, data);
+          }
+        });
+
+        socket.on('newQuestion', (data) => {
+          if (player.joined) {
+            // reset answered state for new question
+            player.answered = false;
+            player.currentRound = data.round;
+            player.currentQuestion = data.question;
+            this.log(`Player ${username} received new question R${data.round}Q${data.question}`, 'info');
+            
+            // simulate typing and submitting answer after delay
+            setTimeout(() => {
+              if (!player.answered && player.joined) { // double check not already answered and still joined
+                const answer = `Answer from ${username} for R${data.round}Q${data.question}`;
+                
+                // simulate the exact same flow as a real user
+                // this matches what happens in user.js when a real user submits
+                socket.emit('submitAnswer', {
+                  pin: gamePin,
+                  username,
+                  userId: player.userId,
+                  answer: answer.trim() // trim like real user input
+                });
+                
+                player.answered = true;
+                this.stats.answered++;
+                this.updateStats();
+                this.log(`Player ${username} submitted answer: "${answer}"`, 'success');
+              }
+            }, Math.random() * answerDelay + 500);
+          }
+        });
+
+        // also listen for gameProgress to track current question
+        socket.on('gameProgress', (data) => {
+          if (player.joined && data.round && data.question) {
+            player.currentRound = data.round;
+            player.currentQuestion = data.question;
+          }
+        });
+
+        socket.on('disconnect', () => {
+          if (player.connected) {
+            player.connected = false;
+            this.stats.connected--;
+            this.updateStats();
+            this.log(`Player ${username} disconnected`, 'warning');
+          }
+        });
+
+        socket.on('connect_error', (error) => {
+          this.stats.errors++;
+          this.updateStats();
+          this.log(`Player ${username} connection error: ${error.message}`, 'error');
+        });
+      }
+
+      stopTest() {
+        if (!this.isRunning) return;
+        
+        this.isRunning = false;
+        document.getElementById('startTest').disabled = false;
+        document.getElementById('stopTest').disabled = true;
+        
+        this.log('Stopping load test...', 'info');
+        
+        // disconnect all players
+        this.players.forEach(player => {
+          if (player.socket) {
+            player.socket.disconnect();
+          }
+        });
+        
+        this.players = [];
+        this.stats = { connected: 0, joined: 0, answered: 0, errors: 0 };
+        this.updateStats();
+        
+        this.log('Load test stopped', 'info');
+      }
+    }
+
+    // initialize load tester
+    const loadTester = new LoadTester();
+  </script>
+</body>
+</html>

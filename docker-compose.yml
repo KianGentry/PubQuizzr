@@ -3,7 +3,7 @@ services:
     build:
       context: .
       args:
-        ADMIN_PIN: 3004
+        ADMIN_: 3004
     ports:
       - "3011:3011"
     stdin_open: true

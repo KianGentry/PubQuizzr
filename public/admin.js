@@ -28,23 +28,7 @@ document.getElementById("finishGame").addEventListener("click", () => {
   }
 });
 
-socket.on("gameCreated", (pin) => {
-  if (pin) {
-    pinDisplay.textContent = `Game PIN: ${pin}`;
-    // Only clear everything when a new game is started
-    playerList.innerHTML = "";
-    answersContainer.innerHTML = "";
-    roundDisplay.textContent = "";
-    questionDisplay.textContent = "";
-  } else {
-    pinDisplay.textContent = "Game PIN: (Game Finished)";
-    // Do NOT clear answersContainer or results here
-    roundDisplay.textContent = "";
-    questionDisplay.textContent = "";
-    playerList.innerHTML = "";
-    // answersContainer is left untouched to preserve answers/results
-  }
-});
+// First gameCreated handler removed - using the one below instead
 
 socket.on("playerList", (players) => {
   playerList.innerHTML = "";
@@ -189,23 +173,36 @@ function renderAnswers(answers) {
 // Show results when game is finished
 socket.on("gameResults", (results) => {
   // results: [{ username, points }]
-  // Do not clear answersContainer, just append results at the top
+  console.log("Received game results:", results);
+  
+  // Remove any existing results first
+  const existingResults = document.querySelector(".final-results");
+  if (existingResults) {
+    existingResults.remove();
+  }
+  
+  // Create new results display
   const resultsDiv = document.createElement("div");
   resultsDiv.className = "final-results";
   resultsDiv.innerHTML = "<h2>Final Results</h2>";
-  const ol = document.createElement("ol");
-  results.forEach(({ username, points }, idx) => {
-    const li = document.createElement("li");
-    li.textContent = `${username}: ${points} point${points === 1 ? "" : "s"}`;
-    if (idx === 0) li.classList.add("gold");
-    else if (idx === 1) li.classList.add("silver");
-    else if (idx === 2) li.classList.add("bronze");
-    ol.appendChild(li);
-  });
-  resultsDiv.appendChild(ol);
+  
+  if (results && results.length > 0) {
+    const ol = document.createElement("ol");
+    results.forEach(({ username, points }, idx) => {
+      const li = document.createElement("li");
+      li.textContent = `${username}: ${points} point${points === 1 ? "" : "s"}`;
+      if (idx === 0) li.classList.add("gold");
+      else if (idx === 1) li.classList.add("silver");
+      else if (idx === 2) li.classList.add("bronze");
+      ol.appendChild(li);
+    });
+    resultsDiv.appendChild(ol);
+  } else {
+    resultsDiv.innerHTML += "<p>No results available</p>";
+  }
 
-  // Insert results above the answers
-  answersContainer.prepend(resultsDiv);
+  // Insert results at the very top of the answers container
+  answersContainer.insertBefore(resultsDiv, answersContainer.firstChild);
 });
 
 // Listen for answersUpdated to render answers with latest points
@@ -241,13 +238,17 @@ socket.on("gameStarted", () => {
 
 // Enable Start Game button on new game
 socket.on("gameCreated", (pin) => {
+  console.log("Admin received gameCreated event with PIN:", pin);
   if (pin) {
     pinDisplay.textContent = `Game PIN: ${pin}`;
-    // Only clear everything when a new game is started
+    // Clear everything when a new game is started
     playerList.innerHTML = "";
     answersContainer.innerHTML = "";
     roundDisplay.textContent = "";
     questionDisplay.textContent = "";
+    // Clear any cached data
+    window.latestAnswers = null;
+    window.latestPoints = null;
   } else {
     pinDisplay.textContent = "Game PIN: (Game Finished)";
     // Do NOT clear answersContainer or results here
@@ -259,10 +260,45 @@ socket.on("gameCreated", (pin) => {
   startGameBtn.disabled = false;
 });
 
+// Question input functionality
+const questionTextarea = document.getElementById('currentQuestionText');
+const updateQuestionBtn = document.getElementById('updateQuestion');
+
+updateQuestionBtn.addEventListener('click', () => {
+  const questionText = questionTextarea.value.trim();
+  if (questionText) {
+    socket.emit('updateCurrentQuestion', { question: questionText });
+  }
+});
+
+// Auto-update question on Enter key (Ctrl+Enter for new line)
+questionTextarea.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.ctrlKey) {
+    e.preventDefault();
+    updateQuestionBtn.click();
+  }
+});
+
+// Listen for question updates from server
+socket.on('currentQuestionUpdated', (data) => {
+  if (data.question) {
+    questionTextarea.value = data.question;
+  }
+});
+
+// Clear question when moving to next question
+document.getElementById('nextQuestion').addEventListener('click', () => {
+  questionTextarea.value = '';
+  socket.emit('updateCurrentQuestion', { question: '' });
+});
+
+// Clear question when moving to next round
+document.getElementById('nextRound').addEventListener('click', () => {
+  questionTextarea.value = '';
+  socket.emit('updateCurrentQuestion', { question: '' });
+});
+
 // Only call getGameState once on page load
 socket.emit("getGameState"); // Ask for latest state when page loads
 // Re-render answers with updated points
 if (window.latestAnswers) renderAnswers(window.latestAnswers);
-
-socket.emit("getGameState"); // Ask for latest state when page loads
-socket.emit("getGameState"); // Ask for latest state when page loads
